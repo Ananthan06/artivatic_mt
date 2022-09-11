@@ -1,9 +1,16 @@
+import 'package:artivatic_mt/providers/data_provider.dart';
 import 'package:artivatic_mt/screens/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-   const MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<PostDataProvider>(create: (_) => PostDataProvider()),
+      ],
+      child:const MyApp(),
+    ),
   );
 }
 

@@ -1,5 +1,8 @@
 /// This is the home page of application.
+import 'package:artivatic_mt/providers/data_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -9,19 +12,29 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late PostDataProvider postMdl;
+
   @override
   void initState() {
+    final postMdl = Provider.of<PostDataProvider>(context, listen: false);
+    postMdl.getPostData(context);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    postMdl = Provider.of<PostDataProvider>(context);
     return Scaffold(
-        appBar: AppBar(title: const Text("Title"),
-
-        ), body: getBody());
+        appBar: AppBar(
+          title: postMdl.loading ? const Text("Loading...") :
+          Text(postMdl.post.title.toString()),
+        ),
+        body:  postMdl.loading ?
+        const Center(child: CircularProgressIndicator.adaptive(),)
+            : getBody());
   }
 
+  /// displays body of the app
   Widget getBody() {
     return Container(
       height: double.infinity,
@@ -30,14 +43,15 @@ class _MyHomePageState extends State<MyHomePage> {
       padding: const EdgeInsets.all(10),
       child: ListView(
           shrinkWrap: true,
-          children: List.generate(5, (int index) {
+          children: List.generate(postMdl.post.rows!.length, (int index) {
             return getListContentWidget(index);
           })),
     );
   }
 
+  /// List view of card widget that shows each element with title,description and image.
   Widget getListContentWidget(int index) {
-    return Card(
+    return postMdl.post.rows![index].title != "" && postMdl.post.rows![index].title != null ? Card(
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8))),
         color: Colors.white,
@@ -48,27 +62,37 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children:  [
               Text(
-                "Title",
-                style: TextStyle(
+                postMdl.post.rows![index].title??"",
+                style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 14),
               ),
-              SizedBox(
+            const  SizedBox(
                 height: 3,
               ),
-              Text("Description",
-                  style: TextStyle(
+              Text(
+                  postMdl.post.rows![index].description??"",
+                  style: const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.normal,
                       fontSize: 12)),
-              SizedBox(
+           const SizedBox(
                 height: 3,
               ),
+
+              postMdl.post.rows![index].imageHref != null ?
+              CachedNetworkImage(imageUrl: postMdl.post.rows![index].imageHref ?? "",
+                  placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) {
+                    return const Center(child: Icon(Icons.error));
+                  })
+                  :const SizedBox(),
+
             ],
           ),
-        ));
+        )) : const SizedBox();
   }
 }
