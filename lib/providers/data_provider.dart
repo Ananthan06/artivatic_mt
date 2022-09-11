@@ -14,10 +14,10 @@ class PostDataProvider with ChangeNotifier {
   final controller = TextEditingController();
   String _searchString = "";
 
-
   /// This future function awaits for api response and updates the UI.
   Future<void> getPostData(context) async {
     loading = true;
+    notifyListeners();
     int status = await NetworkUtils().isNetworkAvailable();
     if (status != 0 && status == 1) {
       networkNotAvailable = false;
@@ -26,27 +26,30 @@ class PostDataProvider with ChangeNotifier {
         loading = false;
         _searchString = "";
         controller.clear();
-      }catch(e){
+      } catch (e) {
         loading = false;
       }
-    }else{
+    } else {
       networkNotAvailable = true;
       loading = false;
     }
     notifyListeners();
   }
 
-
   /// Filter searched item with title of the list and returns the value.
   List<DataRows>? get data => _searchString.isEmpty
       ? post.rows
-      :  post.rows?.where((element) =>  element.title != null && element.title!.toLowerCase().contains(_searchString.toLowerCase())).toList();
-
+      : post.rows
+          ?.where((element) =>
+              element.title != null &&
+              element.title!
+                  .toLowerCase()
+                  .contains(_searchString.toLowerCase()))
+          .toList();
 
   /// Function to implement simple search functionality.
   void changeSearchString(String searchString) {
     _searchString = searchString;
     notifyListeners();
   }
-
 }

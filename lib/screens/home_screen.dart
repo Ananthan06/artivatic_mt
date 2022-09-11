@@ -29,6 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
           title: postMdl.loading
               ? const Text("Loading...")
               : Text(postMdl.post.title ?? "Artivatic Demo"),
+          actions: [getRefresh()],
         ),
         body: postMdl.loading
             ? const Center(
@@ -54,14 +55,19 @@ class _MyHomePageState extends State<MyHomePage> {
       padding: const EdgeInsets.all(10),
       child: Column(
         children: [
-         getSearchBar(),
+          getSearchBar(),
           Expanded(
-            child: postMdl.data != null && postMdl.data!.isNotEmpty ? ListView(
-                shrinkWrap: true,
-                children: List.generate(postMdl.data!.length, (int index) {
-                  return getListContentWidget(index);
-                }))
-            : getNoDataFound(),
+            child: postMdl.data != null && postMdl.data!.isNotEmpty
+                ? RefreshIndicator(
+                    onRefresh: () => postMdl.getPostData(context),
+                    child: ListView(
+                        shrinkWrap: true,
+                        children:
+                            List.generate(postMdl.data!.length, (int index) {
+                          return getListContentWidget(index);
+                        })),
+                  )
+                : getNoDataFound(),
           ),
         ],
       ),
@@ -69,23 +75,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   ///Text field widget to search items offline.
-  Widget getSearchBar(){
-    return  Container(
+  Widget getSearchBar() {
+    return Container(
       height: 50,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
         color: Colors.white,
       ),
       padding: const EdgeInsets.all(5),
-      margin: const EdgeInsets.only(
-          bottom: 10),
+      margin: const EdgeInsets.only(bottom: 10),
       child: TextField(
-        decoration: const InputDecoration(hintText: "Search",
+        decoration: const InputDecoration(
+          hintText: "Search",
           icon: Icon(Icons.search),
           border: InputBorder.none,
         ),
         controller: postMdl.controller,
-        onChanged: (value){
+        onChanged: (value) {
           Provider.of<PostDataProvider>(context, listen: false)
               .changeSearchString(value);
         },
@@ -143,12 +149,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   ///Returns No data found text when list is empty.
-  Widget getNoDataFound(){
-    return  const Center(child: Text("NO DATA FOUND !",
-    style: TextStyle(
-    fontWeight: FontWeight.bold,
-    fontSize: 15
-    ),),);
+  Widget getNoDataFound() {
+    return const Center(
+      child: Text(
+        "NO DATA FOUND !",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+      ),
+    );
   }
 
+  /// refresh button in app bar to reload the list by calling api
+  Widget getRefresh() {
+    return InkWell(
+      onTap: () => postMdl.getPostData(context),
+      child: const Icon(
+        Icons.refresh,
+        color: Colors.white,
+      ),
+    );
+  }
 }

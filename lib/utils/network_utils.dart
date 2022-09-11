@@ -1,8 +1,6 @@
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-class NetworkUtils{
-
+class NetworkUtils {
   // checks for internet connection- wifi/mobile data.
   Future<int> isNetworkAvailable() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -18,5 +16,4 @@ class NetworkUtils{
     }
     return 0;
   }
-
 }

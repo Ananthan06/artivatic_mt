@@ -2,15 +2,7 @@
 
 A sample Flutter application for machine test.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Built by Anandakrishnan. For machine test at Artivativ.io.
+This app calls api and generate and displays list of cards. The card includes title,descrition and image.
+App supports both potrait and landscape view.
+App uses provider, http, cached_network_image, connectivity_plus plgins for smooth functionality.

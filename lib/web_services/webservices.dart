@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class WebServices {
-  static const String url = "https://run.mocky.io/v3/c4ab4c1c-9a55-4174-9ed2-cbbe0738eedf";
+  static const String url =
+      "https://run.mocky.io/v3/c4ab4c1c-9a55-4174-9ed2-cbbe0738eedf";
 
   ///Function to call api request and get data and handle error.
   Future<dynamic> getResponsePostData(context) async {
@@ -25,5 +26,4 @@ class WebServices {
       log(e.toString());
     }
   }
-
 }
