@@ -26,12 +26,23 @@ class _MyHomePageState extends State<MyHomePage> {
     postMdl = Provider.of<PostDataProvider>(context);
     return Scaffold(
         appBar: AppBar(
-          title: postMdl.loading ? const Text("Loading...") :
-          Text(postMdl.post.title.toString()),
+          title: postMdl.loading
+              ? const Text("Loading...")
+              : Text(postMdl.post.title ?? "Artivatic Demo"),
         ),
-        body:  postMdl.loading ?
-        const Center(child: CircularProgressIndicator.adaptive(),)
-            : getBody());
+        body: postMdl.loading
+            ? const Center(
+                child: CircularProgressIndicator.adaptive(),
+              )
+            : !postMdl.networkNotAvailable
+                ? getBody()
+                : const Center(
+                    child: Text(
+                      "NETWORK UNAVAILABLE !",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                  ));
   }
 
   /// displays body of the app
@@ -41,58 +52,103 @@ class _MyHomePageState extends State<MyHomePage> {
       width: double.infinity,
       color: Colors.black12,
       padding: const EdgeInsets.all(10),
-      child: ListView(
-          shrinkWrap: true,
-          children: List.generate(postMdl.post.rows!.length, (int index) {
-            return getListContentWidget(index);
-          })),
+      child: Column(
+        children: [
+         getSearchBar(),
+          Expanded(
+            child: postMdl.data != null && postMdl.data!.isNotEmpty ? ListView(
+                shrinkWrap: true,
+                children: List.generate(postMdl.data!.length, (int index) {
+                  return getListContentWidget(index);
+                }))
+            : getNoDataFound(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  ///Text field widget to search items offline.
+  Widget getSearchBar(){
+    return  Container(
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        color: Colors.white,
+      ),
+      padding: const EdgeInsets.all(5),
+      margin: const EdgeInsets.only(
+          bottom: 10),
+      child: TextField(
+        decoration: const InputDecoration(hintText: "Search",
+          icon: Icon(Icons.search),
+          border: InputBorder.none,
+        ),
+        controller: postMdl.controller,
+        onChanged: (value){
+          Provider.of<PostDataProvider>(context, listen: false)
+              .changeSearchString(value);
+        },
+      ),
     );
   }
 
   /// List view of card widget that shows each element with title,description and image.
   Widget getListContentWidget(int index) {
-    return postMdl.post.rows![index].title != "" && postMdl.post.rows![index].title != null ? Card(
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8))),
-        color: Colors.white,
-        margin: EdgeInsets.only(top: index != 0 ? 11 : 0),
-        child: Padding(
-          padding:
-              const EdgeInsets.only(right: 24, left: 22, top: 22, bottom: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:  [
-              Text(
-                postMdl.post.rows![index].title??"",
-                style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14),
+    return postMdl.data![index].title != "" &&
+            postMdl.data![index].title != null
+        ? Card(
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8))),
+            color: Colors.white,
+            margin: EdgeInsets.only(top: index != 0 ? 11 : 0),
+            child: Padding(
+              padding: const EdgeInsets.only(
+                  right: 24, left: 22, top: 22, bottom: 20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    postMdl.data![index].title ?? "",
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14),
+                  ),
+                  const SizedBox(
+                    height: 3,
+                  ),
+                  Text(postMdl.data![index].description ?? "",
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 12)),
+                  const SizedBox(
+                    height: 3,
+                  ),
+                  postMdl.data![index].imageHref != null
+                      ? CachedNetworkImage(
+                          imageUrl: postMdl.data![index].imageHref ?? "",
+                          placeholder: (context, url) =>
+                              const Center(child: CircularProgressIndicator()),
+                          errorWidget: (context, url, error) {
+                            return const Center(child: Icon(Icons.error));
+                          })
+                      : const SizedBox(),
+                ],
               ),
-            const  SizedBox(
-                height: 3,
-              ),
-              Text(
-                  postMdl.post.rows![index].description??"",
-                  style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 12)),
-           const SizedBox(
-                height: 3,
-              ),
-
-              postMdl.post.rows![index].imageHref != null ?
-              CachedNetworkImage(imageUrl: postMdl.post.rows![index].imageHref ?? "",
-                  placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                  errorWidget: (context, url, error) {
-                    return const Center(child: Icon(Icons.error));
-                  })
-                  :const SizedBox(),
-
-            ],
-          ),
-        )) : const SizedBox();
+            ))
+        : const SizedBox();
   }
+
+  ///Returns No data found text when list is empty.
+  Widget getNoDataFound(){
+    return  const Center(child: Text("NO DATA FOUND !",
+    style: TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 15
+    ),),);
+  }
+
 }
